@@ -1,0 +1,108 @@
+- hosts: localhost
+  tasks:
+   - command: "setenforce 0"
+
+   - service:
+      name: "firewalld"
+      state: stopped
+
+   - include_vars: "/hadoop/j.yml"
+
+
+   - file:
+      path: "/hadoop3/"
+      state: directory
+     ignore_errors: yes
+   - stat:
+      path: "/hadoop3"
+     register: h
+   - debug:
+       msg: "Failed to create configuration directory!"
+     when: h.stat.exists == false
+
+
+
+   - copy:
+      src: "/Softwares/share/Software/jdk-8u171-linux-x64.rpm"
+      dest: "/hadoop3/"
+     ignore_errors: yes
+   - stat:
+      path: "/hadoop3/jdk-8u171-linux-x64.rpm"
+     register: jdk
+   - debug:
+       msg: "Failed to configure jdk!"
+     when: jdk.stat.exists == false
+     
+   
+
+   - command: "rpm -ivh /hadoop3/jdk-8u171-linux-x64.rpm"
+
+
+
+   - unarchive:
+      src: "/Softwares/share/Software/hadoop-3.1.0.tar.gz"
+      dest: "/hadoop3/hadoop-3.1.0"
+     ignore_errors: yes
+     register: t
+   - debug:
+      msg: "Failed to copy hadoop software!"
+     when: t.failed == true
+
+
+
+
+   - file:
+      dest: "/hadoop3/hadoop-3.1.0.tar.gz"
+      state: absent  
+     ignore_errors: yes
+
+
+   - lineinfile:  
+       path: "/root/.bashrc"
+       line: "JAVA_HOME=/usr/java/jdk1.8.0_171-amd64/"
+
+
+   - lineinfile:
+       path: "/root/.bashrc"
+       line: "PATH=/usr/java/jdk1.8.0_171-amd64/bin/:$PATH"
+
+
+   - file:
+      path: "/hadoop3/{{ dir }}"
+      state: directory
+     ignore_errors: yes
+   - stat:
+      path: "/hadoop3/{{ dir }}"
+     register: d
+   - debug:
+       msg: "Failed to create directory for hadoop datanode!"
+     when: d.stat.exists == false
+
+
+
+   - lineinfile:
+      path: "/etc/hadoop/mapred-site.xml"
+      insertafter: "<configuration>"
+      line: "<property>\n<name>mapred.job.tracker</name>\n<value>/{{ dir }}</value>\n</property>"
+     ignore_errors: yes   
+     register: mp
+   - debug:
+      msg: "Failed to edit hadoop hdfs-site file!"
+     when: mp.failed == true
+
+
+
+   - lineinfile:
+      path: "/etc/hadoop/core-site.xml"
+      insertafter: "<configuration>"
+      line: "<property>\n<name>fs.default.name</name>\n<value>hdfs://{{ name_ip }}:9002</value>\n</property>"
+     ignore_errors: yes
+     register: cs
+   - debug:
+      msg: "Failed to edit hadoop hdfs-site file!"
+     when: cs.failed == true
+
+
+
+   - command: "hadoop-daemon.sh start jobtracker"
+   

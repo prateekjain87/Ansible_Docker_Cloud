@@ -1,0 +1,2 @@
+df -hT | grep "/dev/sda1" |awk '{ print $5}'
+df -hT | grep "/dev/sda1" |awk '{ print $3}'

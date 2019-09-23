@@ -1,0 +1,47 @@
+- hosts: localhost
+  tasks:
+
+    - include_vars: "/Cloud/lvdetails.yml"  
+
+    - lvol:
+        vg: vgcloud
+        lv: "{{lvname}}"
+        size: "{{lvsize}}g"
+        pvs: /dev/sdb1
+        active: yes
+        state: present
+
+    - filesystem:
+        fstype: ext4
+        dev: /dev/vgcloud/{{lvname}}
+
+    - file:
+        path: "/cloud"
+        state: directory
+
+    - mount:
+        path: "/cloud"
+        src: "/dev/vgcloud/{{lvname}}"
+        fstype: ext4
+        state: mounted
+
+    - package:
+         name: "nfs-utils"
+         state: present
+
+    - lineinfile:
+         path: "/etc/exports"
+         line: "/cloud/{{lvname}}  *(rw,no_root_squash)"
+
+
+    - command: "setenforce 0"
+
+    - service:
+       name: "firewalld"
+       state: stopped     
+
+    - service:
+         name: "nfs"
+         state: started
+         enabled: yes
+         

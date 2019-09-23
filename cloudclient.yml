@@ -1,0 +1,31 @@
+- hosts: node
+  tasks: 
+ 
+    - include_vars: "/Cloud/client_details.yml"
+    
+    - file:
+        path: "/media/CloudServices"
+        state: directory
+   
+    - package:
+         name: "nfs-utils"
+         state: present
+   
+    - command: "setenforce 0"
+
+    - service:
+       name: "firewalld"
+       state: stopped     
+
+    - service:
+         name: "nfs"
+         state: started
+         enabled: yes
+
+    - mount:
+        path: "/media/dropbox"
+        src: "{{ip}}:/cloud/{{name}}"
+        fstype: nfs
+        state: mounted
+        
+  #  - command: "mount 192.168.37.13:/cloud  /media/dropbox"  

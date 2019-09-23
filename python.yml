@@ -1,0 +1,23 @@
+- hosts: 192.168.1.80
+  tasks:
+   - include_vars: "/Cloud/xpra_details.yml"
+   - pip:
+      name: docker-py
+      state: present
+   - package:
+      name: docker-ce
+      state: present
+   - service:
+      name: docker
+      state: started
+      enabled: yes
+   - docker_container: 
+      name: "test{{name}}"
+      image: centos:s1
+      command: python
+      state: started
+      detach: True
+      interactive: True
+      tty: True  
+      ports:
+       - "{{port}}:4200"

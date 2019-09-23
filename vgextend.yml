@@ -1,0 +1,14 @@
+- hosts: localhost
+  tasks:
+ 
+   - include_vars: "/Cloud/create_details.yml" 
+
+   - lvol:
+      vg: "vgcloud"
+      lv: "{{name}}"
+      size: "{{ size }}g"
+      resize2fs: yes
+      force: yes
+      active: yes
+      
+

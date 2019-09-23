@@ -1,0 +1,27 @@
+- hosts: 192.168.43.6
+  tasks:
+   - include_vars: "/Cloud/xpra_details.yml"
+   - pip:
+      name: docker-py
+      state: present
+   - package:
+      name: docker-ce
+      state: present
+   - service:
+      name: docker
+      state: started
+      enabled: yes
+   - docker_container: 
+      name: {{}}
+      image: xpra:v9
+      command: /bin/bash
+      state: started
+      detach: True
+      interactive: True
+      tty: True
+      ipc_mode: host
+      ports:
+       - "2590:2569"
+      devices:
+       - "/dev/snd:/dev/snd"
+      

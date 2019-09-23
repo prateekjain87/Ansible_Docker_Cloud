@@ -1,0 +1,25 @@
+- hosts:
+  tasks:
+   - pip:
+       name: docker-py
+       state: present
+   - package:
+       name: docker-ce
+       state: present
+   - service:
+       name: docker
+       state: restarted
+       enabled: yes
+
+   - docker_container:
+       name:
+       image: xpra
+       state: present
+       detach: yes
+       interactive: yes
+       tty: yes
+       recreate: yes
+       command:
+       state:
+
+

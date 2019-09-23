@@ -1,0 +1,14 @@
+- hosts: localhost
+  tasks:
+    - parted:
+        device: /dev/sdb
+        number: 1
+        state: present
+	flags: [ lvm ]
+        part_end: 10GiB
+
+
+    - lvg:
+       vg: vgcloud
+       pvs: /dev/sdb1
+   
